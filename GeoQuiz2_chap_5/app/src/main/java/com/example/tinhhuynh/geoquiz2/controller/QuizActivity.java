@@ -4,10 +4,9 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -16,10 +15,14 @@ import com.example.tinhhuynh.geoquiz2.R;
 import com.example.tinhhuynh.geoquiz2.model.Question;
 
 import java.util.ArrayList;
-import java.util.TreeSet;
 
 public class QuizActivity extends AppCompatActivity {
 
+    private static final String KEY_INDEX = "index";
+    private static final String KEY_CHEATER = "cheater";
+    private static final String KEY_CHEATED_INDEXES = "cheatedIndexes";
+    private static final String TAG = "QuizActivity";
+    private static final int REQUEST_CODE_CHEAT = 0;
     private Button mTrueButton;
     private Button mFalseButton;
     private Button mNextButton;
@@ -32,21 +35,14 @@ public class QuizActivity extends AppCompatActivity {
             new Question(R.string.question_americas, true),
             new Question(R.string.question_asia, true),
     };
-
-
-    private static final String KEY_INDEX = "index";
-    private static final String KEY_CHEATER = "cheater";
-    private static final String KEY_CHEATED_INDEXES = "cheatedIndexes";
     private int mCurrentIndex = 0;
-    private static final String TAG = "QuizActivity";
-    private static final int REQUEST_CODE_CHEAT = 0;
     private boolean mIsCheater;
-    private ArrayList<Integer> mCheatedIndexes = new ArrayList<Integer>();
+    private ArrayList<Integer> mCheatedIndexes = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG, "onCreate");
+//        Log.d(TAG, "onCreate");
         setContentView(R.layout.activity_quiz);
         mQuestionTextView = (TextView) findViewById(R.id.question_text_view);
 
@@ -105,14 +101,11 @@ public class QuizActivity extends AppCompatActivity {
     private void checkAnswer(boolean userPressedTrue) {
         boolean answerIsTrue = mQuestionBank[mCurrentIndex].isTrueAnswer();
         int messageResId = R.string.incorrect_toast;
-        if(mIsCheater || !mCheatedIndexes.isEmpty()){
+        if (mIsCheater || (!mCheatedIndexes.isEmpty() && mCheatedIndexes.contains(mCurrentIndex))) {
             messageResId = R.string.judgement_toast;
-//            if(!mIsCheater){
-//                mIsCheater = true;
-//            }
-            if(!mIsCheater || mCheatedIndexes.contains(mCurrentIndex)){
+            if (!mIsCheater) {
                 mIsCheater = true;
-                mCheatedIndexes.remove(mCheatedIndexes.indexOf(mCurrentIndex));
+//                mCheatedIndexes.remove(mCheatedIndexes.indexOf(mCurrentIndex));
             }
         }else {
             if (answerIsTrue == userPressedTrue) {
@@ -130,6 +123,7 @@ public class QuizActivity extends AppCompatActivity {
         if(requestCode == REQUEST_CODE_CHEAT){
             if(data != null){
                 mIsCheater = CheatActivity.wasAnswerShown(data);
+//                Log.d("CheatActivity", "cheater: " + mIsCheater);
                 if(mIsCheater && !mCheatedIndexes.contains(mCurrentIndex)){
                     mCheatedIndexes.add(mCurrentIndex);
                 }
@@ -140,43 +134,13 @@ public class QuizActivity extends AppCompatActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        Log.d(TAG, "onSaveInstanceState");
+//        Log.d(TAG, "onSaveInstanceState");
         outState.putInt(KEY_INDEX, mCurrentIndex);
         outState.putBoolean(KEY_CHEATER, mIsCheater);
         outState.putIntegerArrayList(KEY_CHEATED_INDEXES, mCheatedIndexes);
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        Log.d(TAG, "onStart");
-    }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        Log.d(TAG, "onPause");
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        Log.d(TAG, "onResume");
-
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        Log.d(TAG, "onStop");
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        Log.d(TAG, "onDestroy");
-
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
